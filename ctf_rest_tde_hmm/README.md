@@ -1,4 +1,4 @@
-# TDE-HMM Dynamic Network Analysis for Resting-State CTF Data
+# TDE-HMM Network Analysis for Resting-State CTF Data
 
 ## Dataset
 
@@ -42,5 +42,6 @@ Note, there is a variable called `n_workers` in scripts `01`-`04` and `n_jobs` i
 
 You should expect to get something similar to the following results:
 
+![Results](results.jpeg)
 
-The above networks were from the best run of 10. You should be able to reproduce this if you also pick the best of 10.
+The above networks were from the best run of 10.
