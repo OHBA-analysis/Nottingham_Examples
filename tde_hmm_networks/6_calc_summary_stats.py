@@ -5,7 +5,7 @@
 from sys import argv
 
 if len(argv) != 3:
-    print("Please pass the number of states and run id, e.g. python 10_calc_summary_stats.py 8 1")
+    print("Please pass the number of states and run id, e.g. python 6_calc_summary_stats.py 8 1")
     exit()
 n_states = int(argv[1])
 run = int(argv[2])

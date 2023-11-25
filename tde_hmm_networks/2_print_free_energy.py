@@ -5,7 +5,7 @@
 from sys import argv
 
 if len(argv) != 2:
-    print("Please pass the number of states, e.g. python 06_print_free_energy.py 8")
+    print("Please pass the number of states, e.g. python 2_print_free_energy.py 8")
     exit()
 n_states = int(argv[1])
 

@@ -7,7 +7,7 @@ free energy. Historically, picking the best of 10 runs has worked well.
 from sys import argv
 
 if len(argv) != 3:
-    print("Please pass the number of states and run id, e.g. python 05_train_hmm.py 8 1")
+    print("Please pass the number of states and run id, e.g. python 1_train_hmm.py 8 1")
     exit()
 n_states = int(argv[1])
 run = int(argv[2])
@@ -17,7 +17,6 @@ run = int(argv[2])
 print("Importing packages")
 
 import pickle
-from glob import glob
 
 from osl_dynamics.data import Data
 from osl_dynamics.models.hmm import Config, Model
@@ -25,11 +24,8 @@ from osl_dynamics.models.hmm import Config, Model
 #%% Load data
 
 # Load data
-files = sorted(glob("data/src/*/sflip_parc-raw.fif"))
 data = Data(
-    files,
-    picks="misc",
-    reject_by_annotation="omit",
+    "data/npy",
     store_dir=f"tmp_{n_states}_{run}",
     use_tfrecord=True,
     n_jobs=16,

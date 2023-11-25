@@ -5,7 +5,7 @@
 from sys import argv
 
 if len(argv) != 3:
-    print("Please pass the number of states and run id, e.g. python 08_calc_multitaper.py 8 1")
+    print("Please pass the number of states and run id, e.g. python 4_calc_multitaper.py 8 1")
     exit()
 n_states = int(argv[1])
 run = int(argv[2])
@@ -17,7 +17,6 @@ print("Importing packages")
 import os
 import pickle
 import numpy as np
-from glob import glob
 
 from osl_dynamics.analysis import spectral
 from osl_dynamics.data import Data
@@ -33,11 +32,8 @@ os.makedirs(spectra_dir, exist_ok=True)
 #%% Load data and inferred state probabilities
 
 # Load source reconstructed data
-files = sorted(glob("data/src/*/sflip_parc-raw.fif"))
 data = Data(
-    files,
-    picks="misc",
-    reject_by_annotation="omit",
+    "data/npy",
     store_dir=f"tmp_{n_states}_{run}",
     use_tfrecord=True,
     n_jobs=16,
