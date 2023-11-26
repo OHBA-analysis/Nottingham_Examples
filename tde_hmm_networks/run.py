@@ -1,5 +1,7 @@
 """Full TDE-HMM Network Analysis Pipeline.
 
+Functions listed in the config are defined in osl_dynamics.config_api.wrappers.
+
 Note, the recommended number of PCA components is approximately twice the
 number of original parcels.
 """

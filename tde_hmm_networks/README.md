@@ -1,7 +1,5 @@
 # TDE-HMM Network Analysis
 
-Time-Delay Embedded Hidden Markov Model (TDE-HMM) network analysis.
-
 To learn about the HMM, see the osl-dynamics [docs](https://osl-dynamics.readthedocs.io/en/latest/models/hmm.html).
 
 ## To run
@@ -33,5 +31,3 @@ Note, there is a variable called `n_jobs` in these scripts that should be set to
 If you train the HMM on the CTF data source reconstucted in the MEGUK example (see `/ctf_preproc`). You should expect to get something similar to the following results:
 
 ![Results](results.jpeg)
-
-The above networks were from the best run of 10.
