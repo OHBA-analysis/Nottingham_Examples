@@ -14,3 +14,4 @@ data = Data(
     n_jobs=16,
 )
 data.save("data/npy")
+data.delete_dir()
