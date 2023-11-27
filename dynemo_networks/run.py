@@ -32,8 +32,10 @@ config = f"""
             n_modes: {n_modes}
             learn_means: False
             learn_covariances: True
-            n_kl_annealing_epochs: 10
-            n_epochs: 20
+            sequence_length: 100
+        init_kwargs:
+            n_init: 10
+    plot_dynemo_network_summary_stats: {{}}
     regression_spectra:
         kwargs:
             frequency_range: [1, 45]
@@ -44,7 +46,6 @@ config = f"""
     plot_alpha:
         normalize: True
         kwargs: {{n_samples: 2000}}
-    plot_dynemo_network_summary_stats: {{}}
 """
 
 run_pipeline(config, output_dir=f"results/{n_modes}_modes/run{id:02d}")
