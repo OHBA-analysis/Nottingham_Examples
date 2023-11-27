@@ -21,11 +21,6 @@ from glob import glob
 from osl_dynamics.data import Data, processing
 from osl_dynamics import run_pipeline
 
-# REMEMBER TO REMOVE
-from osl_dynamics.inference import tf_ops
-tf_ops.select_gpu(1)
-tf_ops.gpu_growth()
-
 
 def load_single_channel_data():
     files = sorted(glob("data/npy/*.npy"))
