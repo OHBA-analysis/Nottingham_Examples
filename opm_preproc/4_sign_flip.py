@@ -8,24 +8,20 @@ or calculating sign-invariant quantities such as amplitude envelope
 correlations or power.
 """
 
-from glob import glob
+# Authors: Chetan Gohil <chetan.gohil@psych.ox.ac.uk>
 
 from osl import source_recon
 
-source_recon.setup_fsl("/path/to/fsl")
-
-SRC_DIR = "data/src"
-
-subjects = []
-for path in sorted(glob(SRC_DIR + "/*/parc/parc-raw.fif")):
-    subject = path.split("/")[-3]
-    subjects.append(subject)
+# Source directory and subjects to sign flip
+src_dir = "data/src"
+subjects = ["13703"]
 
 # Find a good template subject to align other subjects to
 template = source_recon.find_template_subject(
-    SRC_DIR, subjects, n_embeddings=15, standardize=True
+    src_dir, subjects, n_embeddings=15, standardize=True
 )
 
+# Settings
 config = f"""
     source_recon:
     - fix_sign_ambiguity:
@@ -37,4 +33,5 @@ config = f"""
         max_flips: 20
 """
 
-source_recon.run_src_batch(config, SRC_DIR, subjects)
+# Do the sign flipping
+source_recon.run_src_batch(config, src_dir, subjects)

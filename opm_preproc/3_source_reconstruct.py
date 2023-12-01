@@ -1,51 +1,50 @@
-"""Example script for source reconstructing OPM data.
+"""Source reconstruction with an LCMV beamformer.
 
-This include coregistration, beamforming and parcellation.
 """
+
+# Authors: Chetan Gohil <chetan.gohil@psych.ox.ac.uk>
+
+import os
 
 from osl import source_recon
 
-source_recon.setup_fsl("/path/to/fsl")
+# Directories
+coreg_dir = "data/coreg"
+src_dir = "data/src"
 
-PREPROC_DIR = "data/preproc"
-SRC_DIR = "data/src"
+# First copy the coregistration directory
+if os.path.exists(src_dir):
+    print(f"Please first delete: {src_dir}")
+    exit()
+cmd = f"cp -r {coreg_dir} {src_dir}"
+print(cmd)
+os.system(cmd)
 
-PREPROC_FILE = PREPROC_DIR + "/sub-{sub:03d}_ses-{ses:03d}_meg/sub-{sub:03d}_ses-{ses:03d}_meg_preproc_raw.fif"
-SMRI_FILE = "data/sub-{sub:03d}/mri/sub-{sub:03d}_fixed.nii"
-
-subjects = [1, 2]
-sessions = [1, 2, 3]
-
+# Settings
 config = """
     source_recon:
-    - compute_surfaces:
-        include_nose: False
-    - coregister:
-        use_nose: False
-        use_headshape: True
-        already_coregistered: True
-    - forward_model:
-        model: Single Layer
     - beamform_and_parcellate:
         freq_range: [4, 40]
         chantypes: mag
         rank: {mag: 100}
-        parcellation_file: fmri_d100_parcellation_with_PCC_reduced_2mm_ss5mm_ds8mm.nii.gz
+        spatial_resolution: 8
+        parcellation_file: aal_cortical_merged_8mm_stacked.nii.gz
         method: spatial_basis
         orthogonalisation: symmetric
 """
 
-preproc_files = []
-smri_files = []
-for sub in subjects:
-    for ses in sessions:
-        preproc_files.append(PREPROC_FILE.format(sub=sub, ses=ses))
-        smri_files.append(SMRI_FILE.format(sub=sub, ses=ses))
+# Subject IDs
+subjects = ["13703"]
 
+# Fif files containing the sensor-level preprocessed data for each subject
+preproc_files = [
+    "data/preproc/13703-braille_test-meg/13703-braille_test-meg_preproc_raw.fif",
+]
+
+# Do source reconstruction
 source_recon.run_src_batch(
     config,
-    src_dir=SRC_DIR,
+    src_dir=src_dir,
     subjects=subjects,
-    preproc_files=preproc_fif_files,
-    smri_files=smri_files,
+    preproc_files=preproc_files,
 )

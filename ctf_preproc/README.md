@@ -1,6 +1,6 @@
 # CTF Data Example
 
-Parallel processing (preprocessing and source reconstruction) of CTF data.
+Preprocessing and source reconstruction of CTF data.
 
 ## Dataset
 
@@ -33,4 +33,6 @@ In this example we:
 - `4_sign_flip.py`: Here, we fix the dipole sign ambiguity (we align the sign of the parcel time courses across subjects). This is only needed if we're training a group-level model on time-delay emebdded data.
 - `5_save_npy.py`: Save the source data as vanilla numpy files in (time, parcels) format.
 
-Note, there is a variable called `n_workers` (or `n_jobs`) in these scripts that should be set to the number of cores you would like to use.
+## Parallelisation
+
+See [here](https://github.com/OHBA-analysis/osl/tree/main/examples/parallelisation) for how to parallelise these scripts.

@@ -1,37 +1,20 @@
-"""Source reconstruction.
+"""Source reconstruction using a LCMV beamformer.
 
-Note, only 64/71 subjects will be source reconstructed.
-The failed subjects are due to missing structurals.
 """
 
-import os.path as op
-from glob import glob
-from pathlib import Path
+# Authors: Chetan Gohil <chetan.gohil@psych.ox.ac.uk>
 
 import numpy as np
 import pandas as pd
-from dask.distributed import Client
 
 from osl import source_recon, utils
-
-source_recon.setup_fsl("/well/woolrich/projects/software/fsl")
-
-# Directories
-RAW_DIR = "data/raw/Nottingham"
-PREPROC_DIR = "data/preproc"
-SRC_DIR = "data/src"
-
-SMRI_FILE = "data/smri/{0}_T1w.nii.gz"
-PREPROC_FILE = PREPROC_DIR + "/{0}_task-resteyesopen_meg/{0}_task-resteyesopen_meg_preproc_raw.fif"
-POS_FILE = RAW_DIR + "/{0}/meg/{0}_headshape.pos"
-
 
 def save_polhemus_from_pos(src_dir, subject, preproc_file, smri_file, epoch_file):
     """Saves fiducials/headshape from a pos file."""
 
-    # Load pos file
-    pos_file = POS_FILE.format(subject)
-    utils.logger.log_or_print(f"Saving polhemus from {pos_file}")
+    # Get path to pos file
+    pos_file = f"data/raw/Nottingham/{subject}/meg/{subject}_headshape.pos"
+    utils.logger.log_or_print(f"Saving polhemus info from {pos_file}")
 
     # Get coreg filenames
     filenames = source_recon.rhino.get_coreg_filenames(src_dir, subject)
@@ -70,47 +53,50 @@ def save_polhemus_from_pos(src_dir, subject, preproc_file, smri_file, epoch_file
     np.savetxt(filenames["polhemus_lpa_file"], polhemus_lpa)
     np.savetxt(filenames["polhemus_headshape_file"], polhemus_headshape)
 
-if __name__ == "__main__":
-    utils.logger.set_up(level="INFO")
-    client = Client(n_workers=16, threads_per_worker=1)
+# Settings
+config = """
+    source_recon:
+    - save_polhemus_from_pos: {}
+    - compute_surfaces:
+        include_nose: True
+    - coregister:
+        use_nose: True
+        use_headshape: True
+    - forward_model:
+        model: Single Layer
+    - beamform_and_parcellate:
+        freq_range: [1, 45]
+        chantypes: mag
+        rank: {mag: 120}
+        parcellation_file: aal_cortical_merged_8mm_stacked.nii.gz
+        method: spatial_basis
+        orthogonalisation: symmetric
+"""
 
-    # Settings
-    config = """
-        source_recon:
-        - save_polhemus_from_pos: {}
-        - compute_surfaces:
-            include_nose: True
-        - coregister:
-            use_nose: True
-            use_headshape: True
-        - forward_model:
-            model: Single Layer
-        - beamform_and_parcellate:
-            freq_range: [1, 45]
-            chantypes: mag
-            rank: {mag: 120}
-            parcellation_file: aal_cortical_merged_8mm_stacked.nii.gz
-            method: spatial_basis
-            orthogonalisation: symmetric
-    """
+# Subject IDs
+subjects = ["sub-not001", "sub-not002"]
 
-    # Get input files
-    subjects = []
-    smri_files = []
-    preproc_files = []
-    for path in sorted(glob(PREPROC_FILE.replace("{0}", "*"))):
-        subject = Path(path).stem.split("_")[0]
-        subjects.append(subject)
-        preproc_files.append(PREPROC_FILE.format(subject))
-        smri_files.append(SMRI_FILE.format(subject))
+# Fif files containing the sensor-level preprocessed data for each subject
+preproc_files = [
+    "data/preproc/sub-not001_task-resteyesopen_meg/sub-not001_task-resteyesopen_meg_preproc_raw.fif",
+    "data/preproc/sub-not002_task-resteyesopen_meg/sub-not002_task-resteyesopen_meg_preproc_raw.fif",
+]
 
-    # Source reconstruction
-    source_recon.run_src_batch(
-        config,
-        src_dir=SRC_DIR,
-        subjects=subjects,
-        preproc_files=preproc_files,
-        smri_files=smri_files,
-        extra_funcs=[save_polhemus_from_pos],
-        dask_client=True,
-    )
+# The corresponding structurals for each subject
+smri_files = [
+    "data/smri/sub-not001_T1w.nii.gz",
+    "data/smri/sub-not002_T1w.nii.gz",
+]
+
+# Output directory to save source reconstructed data to
+src_dir = "data/src"
+
+# Source reconstruction
+source_recon.run_src_batch(
+    config,
+    src_dir=src_dir,
+    subjects=subjects,
+    preproc_files=preproc_files,
+    smri_files=smri_files,
+    extra_funcs=[save_polhemus_from_pos],
+)
