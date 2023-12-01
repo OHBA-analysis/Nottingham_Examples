@@ -78,7 +78,7 @@ conda activate osl
 
 **You need to do every time you open a new terminal.** You know if the `osl` environment is activated if it says `(osl)[...]` at the start of your terminal command line.
 
-Note, if you get a `conda init` error when you try to activate the environment when running a job on a cluster you can use the following to activate the environment then replace:
+Note, if you get a `conda init` error when activating the `osl` environment during a job on an HPC cluster, you can resolve this by replacing
 ```
 conda activate osl
 ```

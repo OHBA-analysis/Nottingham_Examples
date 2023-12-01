@@ -1,4 +1,4 @@
-"""Source reconstruction using a LCMV beamformer.
+"""Coregistration and forward modelling.
 
 """
 
@@ -53,24 +53,50 @@ def save_polhemus_from_pos(src_dir, subject, preproc_file, smri_file, epoch_file
     np.savetxt(filenames["polhemus_lpa_file"], polhemus_lpa)
     np.savetxt(filenames["polhemus_headshape_file"], polhemus_headshape)
 
+def fix_headshape_points(src_dir, subject, preproc_file, smri_file, epoch_file):
+    """Remove headshape points on the nose and neck."""
+
+    # Load saved headshape and nasion files
+    filenames = source_recon.rhino.get_coreg_filenames(src_dir, subject)
+    hs = np.loadtxt(filenames["polhemus_headshape_file"])
+    nas = np.loadtxt(filenames["polhemus_nasion_file"])
+    lpa = np.loadtxt(filenames["polhemus_lpa_file"])
+    rpa = np.loadtxt(filenames["polhemus_rpa_file"])
+
+    # Remove headshape points on the nose
+    remove = np.logical_and(hs[1] > max(lpa[1], rpa[1]), hs[2] < nas[2])
+    hs = hs[:, ~remove]
+
+    # Remove headshape points on the neck
+    remove = hs[2] < min(lpa[2], rpa[2]) - 4
+    hs = hs[:, ~remove]
+
+    # Remove headshape points far from the head in any direction
+    remove = np.logical_or(
+        hs[0] < lpa[0] - 5,
+        np.logical_or(
+            hs[0] > rpa[0] + 5,
+            hs[1] > nas[1] + 5,
+        ),
+    )
+    hs = hs[:, ~remove]
+
+    # Overwrite headshape file
+    utils.logger.log_or_print(f"overwritting {filenames['polhemus_headshape_file']}")
+    np.savetxt(filenames["polhemus_headshape_file"], hs)
+
 # Settings
 config = """
     source_recon:
     - save_polhemus_from_pos: {}
+    - fix_headshape_points: {}
     - compute_surfaces:
-        include_nose: True
+        include_nose: False
     - coregister:
-        use_nose: True
+        use_nose: False
         use_headshape: True
     - forward_model:
         model: Single Layer
-    - beamform_and_parcellate:
-        freq_range: [1, 45]
-        chantypes: mag
-        rank: {mag: 120}
-        parcellation_file: aal_cortical_merged_8mm_stacked.nii.gz
-        method: spatial_basis
-        orthogonalisation: symmetric
 """
 
 # Subject IDs
@@ -88,15 +114,15 @@ smri_files = [
     "data/smri/sub-not002_T1w.nii.gz",
 ]
 
-# Output directory to save source reconstructed data to
-src_dir = "data/src"
+# Directory to save output to
+coreg_dir = "data/coreg"
 
 # Source reconstruction
 source_recon.run_src_batch(
     config,
-    src_dir=src_dir,
+    src_dir=coreg_dir,
     subjects=subjects,
     preproc_files=preproc_files,
     smri_files=smri_files,
-    extra_funcs=[save_polhemus_from_pos],
+    extra_funcs=[save_polhemus_from_pos, fix_headshape_points],
 )
