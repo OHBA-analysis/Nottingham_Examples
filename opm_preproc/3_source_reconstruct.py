@@ -23,9 +23,9 @@ config = """
     - coregister:
         use_nose: False
         use_headshape: True
+        already_coregistered: True
     - forward_model:
         model: Single Layer
-        already_coregistered: True
     - beamform_and_parcellate:
         freq_range: [4, 40]
         chantypes: mag
